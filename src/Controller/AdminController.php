@@ -2,6 +2,7 @@
 
 namespace XT\Admin\Controller;
 
+use XT\Core\Common\Common;
 use XT\Core\Controller\Controller;
 use XT\Core\ToolBox\MessageBox;
 use Zend\Mvc\Service\ControllerPluginManagerFactory;
@@ -25,7 +26,6 @@ class AdminController extends Controller
 
     public function __invoke($sm)
     {
-
         $this->urladmin = $sm->get('Router')->getRoute('admin');
 
         $this->plugin = $sm->get(ControllerPluginManagerFactory::PLUGIN_MANAGER_CLASS);
@@ -51,10 +51,12 @@ class AdminController extends Controller
         $plugin = $this->params()->fromRoute('plugin');
         $act    = $this->params()->fromRoute('act');
         $id     = $this->params()->fromRoute('id');
+        Common::defaultHeader();
 
 
         if (($plugin != null) && (isset($this->admin_plugins[$plugin])))
         {
+            
             return $this->$plugin($this->serviceManager, $act, $id);
         }
         else if ($plugin != null)
@@ -71,6 +73,7 @@ class AdminController extends Controller
             $ar[$key] = $this->$key($this->serviceManager, 'infoplugin', 0);
         }
 
+        
         return new ViewModel(['list' => $ar]);
 
 
@@ -84,6 +87,14 @@ class AdminController extends Controller
 
         return $this->urladmin->assemble($options);
     }
+
+    public function notAdmin()
+    {
+        if (!$this->isGranted('admin.index.page'))
+            return MessageBox::viewNoPermission($this->getEvent(), 'Không có quyền '.'admin.index.page');
+        return false;
+    }
+
 
 
 

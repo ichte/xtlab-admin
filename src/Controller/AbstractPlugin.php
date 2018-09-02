@@ -21,6 +21,11 @@ class AbstractPlugin extends \Zend\Mvc\Controller\Plugin\AbstractPlugin
      */
     var $serviceManager;
 
+    /**
+     * @var \XT\Db\Adapter
+     */
+    var $dbAdapter;
+
 
 
     protected $nameplugin = 'Default';
@@ -43,7 +48,9 @@ class AbstractPlugin extends \Zend\Mvc\Controller\Plugin\AbstractPlugin
     {
 
         $this->serviceManager = $servicemanager;
-        
+
+        $this->dbAdapter = $servicemanager->get(\Zend\Db\Adapter\Adapter::class);
+
         $this->intPlugin();
 
         if ($this->ctrl == null)
@@ -52,7 +59,11 @@ class AbstractPlugin extends \Zend\Mvc\Controller\Plugin\AbstractPlugin
 
         if ($action == null)
             $action = 'index';
-        return $this->$action($id);
+
+        if (method_exists($this,$action))
+            return $this->$action($id);
+        else
+            throw new \Exception("$action not found in " . __CLASS__);
     }
 
     public function createView($dir_DIR_, $name_CLASS_, $name_FUNCTION_)

@@ -32,12 +32,11 @@ return [
     ],
 
     'admin_plugins' => [
-        'test' => \XT\Admin\Admin\TestPlugin\HelloWorld::class
+        //'test' => \XT\Admin\Admin\TestPlugin\HelloWorld::class
     ],
-//    'view_manager' => [
-//        'template_map' => [
-//            'ichte/admin/admin/index'   => __DIR__ . '/../src/view/index.phtml'
-//
-//        ],
-//    ],
+    'view_manager' => [
+        'template_map' => [
+            'xt/admin/admin/index'   => __DIR__ . '/../src/view/index.phtml'
+        ],
+    ],
 ];
