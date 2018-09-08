@@ -1,0 +1,25 @@
+<?
+/**
+ * @var $this PhpRenderer
+ */
+
+$keyCurrentPlugin = '';
+$ar_dropdowns = [];
+foreach ($listplugins as $plugin => $pluginInfo) {
+    if ($pluginInfo['name'] == $currentNameplugin)
+        $keyCurrentPlugin = $plugin;
+    $ar_dropdowns[$pluginInfo['name']] = $this->url('admin', ['plugin' => $plugin]);
+}
+
+$ar_breadcrumbs = [];
+$ar_breadcrumbs['Administrator']    = $this->url('admin');
+$ar_breadcrumbs[$currentNameplugin] = $this->url('admin', ['plugin' => $keyCurrentPlugin]);
+foreach ($listactions as $key => $atcItem) {
+    if  ($key == $currentNameaction)
+        $ar_breadcrumbs[$atcItem['name']] = $atcItem['name'];
+
+}
+?>
+
+<?=$this->dropdownMenu()->setName($currentNameplugin)->render($ar_dropdowns)?>
+<?=$this->pageBreadcrumbs()->setItems( $ar_breadcrumbs )->render(); ?>

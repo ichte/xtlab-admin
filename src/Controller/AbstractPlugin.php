@@ -2,6 +2,7 @@
 
 namespace XT\Admin\Controller;
 
+use XT\Core\Common\Common;
 use XT\Core\Controller\Controller;
 use XT\Core\ToolBox\MessageBox;
 use Zend\Db\Adapter\Adapter;
@@ -24,12 +25,33 @@ class AbstractPlugin extends \Zend\Mvc\Controller\Plugin\AbstractPlugin
     /**
      * @var \XT\Db\Adapter
      */
-    var $dbAdapter;
+    public $dbAdapter;
 
 
 
     protected $nameplugin = 'Default';
     protected $description = 'Default';
+
+    protected $listaction = [];
+
+    /**
+     * @return array
+     */
+    public function getListaction()
+    {
+        return $this->listaction;
+    }
+
+    /**
+     * @param array $listaction
+     */
+    public function setListaction($listaction)
+    {
+        $this->listaction = $listaction;
+    }
+
+
+
 
     public function infoplugin() {
         return [
@@ -60,13 +82,15 @@ class AbstractPlugin extends \Zend\Mvc\Controller\Plugin\AbstractPlugin
         if ($action == null)
             $action = 'index';
 
+
         if (method_exists($this,$action))
             return $this->$action($id);
         else
             throw new \Exception("$action not found in " . __CLASS__);
+
     }
 
-    public function createView($dir_DIR_, $name_CLASS_, $name_FUNCTION_)
+    public function createView($dir_DIR_, $name_CLASS_, $name_FUNCTION_, $name_action = null)
     {
         /**
          * @var $templateMapResolver \Zend\View\Resolver\TemplateMapResolver
@@ -80,14 +104,39 @@ class AbstractPlugin extends \Zend\Mvc\Controller\Plugin\AbstractPlugin
         {
             $templateMapResolver->add($templatename, $templatefile);
         }
+        if (!$templateMapResolver->has('dropdown_breadcrumbs'))
+        {
+            $templateMapResolver->add('dropdown_breadcrumbs', __DIR__.'/../view/dropdown_breadcrumbs.phtml');
+        }
 
         $view = new ViewModel();
+
+        $listplugins = $this->getController()->getListplugins();
+
+
+        $view->setVariable('listplugins' , $listplugins);
+        $view->setVariable('currentNameplugin' , $this->nameplugin);
+        $view->setVariable('listactions' , $this->getListaction());
+        $view->setVariable('currentNameaction' , ($name_action != null) ? $name_action : $name_FUNCTION_);
+
+
+
+
+
         $view->setTemplate($templatename);
         return $view;
     }
 
     public function intPlugin()
     {
+
+    }
+
+    public function notAllow($granted) {
+        if (!$this->ctrl->isGranted($granted))
+            return MessageBox::viewNoPermission($this->ctrl->getEvent(),
+                Common::translate('Not permission granted'). ' : '. $granted);
+        return false;
 
     }
 

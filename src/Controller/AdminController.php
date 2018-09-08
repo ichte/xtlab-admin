@@ -11,6 +11,11 @@ use Zend\View\Model\ViewModel;
 
 class AdminController extends Controller
 {
+
+    /***
+     * @var AdminPluginManager
+     */
+    var $adminpluginManager ;
     /**
      * @var RouteInterface
      */
@@ -22,6 +27,30 @@ class AdminController extends Controller
     protected $admin_plugins;
     protected $serviceManager;
 
+    protected $listplugins;
+
+    /**
+     * @return mixed
+     */
+    public function getListplugins()
+    {
+        if ($this->listplugins == null)
+        {
+            $this->listplugins = [];
+            foreach ($this->admin_plugins as $key => $admin_plugin) {
+                /***
+                 * @var $instanceplugin AbstractPlugin
+                 */
+                $instanceplugin = $this->adminpluginManager->get($key);
+                $this->listplugins[$key] = $instanceplugin($this->serviceManager, 'infoplugin', 0);
+            }
+
+        }
+
+        return $this->listplugins;
+    }
+
+
     const RBAC_ADMIN_INDEX_PAGE = 'admin.index.page';
 
     public function __invoke($sm)
@@ -29,6 +58,8 @@ class AdminController extends Controller
         $this->urladmin = $sm->get('Router')->getRoute('admin');
 
         $this->plugin = $sm->get(ControllerPluginManagerFactory::PLUGIN_MANAGER_CLASS);
+
+
         $cf = $sm->get('config');
         if (isset($cf['admin_plugins']))
         {
@@ -37,11 +68,10 @@ class AdminController extends Controller
         else
             $this->admin_plugins = [];
 
+        $this->adminpluginManager = new AdminPluginManager($sm, ['invokables' => $this->admin_plugins]);
+        $this->adminpluginManager->setController($this);
 
-        foreach ($this->admin_plugins as $namefunction => $pluginclass)
-        {
-            $this->plugin->setInvokableClass($namefunction, $pluginclass);
-        }
+
 
         return $this->init($sm);
     }
@@ -56,8 +86,11 @@ class AdminController extends Controller
 
         if (($plugin != null) && (isset($this->admin_plugins[$plugin])))
         {
-            
-            return $this->$plugin($this->serviceManager, $act, $id);
+            /***
+             * @var $instanceplugin AbstractPlugin
+             */
+            $instanceplugin = $this->adminpluginManager->get($plugin);
+            return $instanceplugin($this->serviceManager, $act, $id);
         }
         else if ($plugin != null)
         {
@@ -68,16 +101,14 @@ class AdminController extends Controller
         $notallow = $this->notAdmin();
         if ($notallow) return $notallow;
 
-        $ar = [];
-        foreach ($this->admin_plugins as $key => $admin_plugin) {
-            $ar[$key] = $this->$key($this->serviceManager, 'infoplugin', 0);
-        }
 
-        
-        return new ViewModel(['list' => $ar]);
+        return new ViewModel(['list' => $this->getListplugins()]);
 
 
     }
+
+
+
     public function buildUrl($plugin = null, $act = null, $id = null)
     {
         $options = [];
