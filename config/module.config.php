@@ -14,7 +14,7 @@ return [
                     'constraints' => [
                         'plugin' => '[a-z][a-z]*',
                         'act'    => '[a-z][a-z]*',
-                        'id'     => '[a-z0-9]*',
+                        'id'     => '[a-zA-Z0-9]*',
                     ]
 
 
@@ -34,9 +34,5 @@ return [
     'admin_plugins' => [
         //'test' => \XT\Admin\Admin\TestPlugin\HelloWorld::class
     ],
-    'view_manager' => [
-        'template_map' => [
-            'xt/admin/admin/index'   => __DIR__ . '/../src/view/index.phtml'
-        ],
-    ],
+
 ];

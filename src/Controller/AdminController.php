@@ -101,8 +101,9 @@ class AdminController extends Controller
         $notallow = $this->notAdmin();
         if ($notallow) return $notallow;
 
-
-        return new ViewModel(['list' => $this->getListplugins()]);
+        $v = new ViewModel(['list' => $this->getListplugins()]);
+        $v->setTemplate('admin/index.phtml');
+        return $v;
 
 
     }

@@ -2,6 +2,7 @@
 
 namespace XT\Admin\Controller;
 
+use XT\Admin\Exception\BadMethodCallException;
 use XT\Core\Common\Common;
 use XT\Core\Controller\Controller;
 use XT\Core\ToolBox\MessageBox;
@@ -34,6 +35,18 @@ class AbstractPlugin extends \Zend\Mvc\Controller\Plugin\AbstractPlugin
 
     protected $listaction = [];
 
+    /**
+     * @return array
+     */
+    public function getListactionIndex()
+    {
+        $ar = [];
+        foreach ($this->listaction as $key => $item) {
+            if ($item['index'])
+                $ar[$key] = $item;
+        }
+        return $ar;
+    }
     /**
      * @return array
      */
@@ -86,7 +99,7 @@ class AbstractPlugin extends \Zend\Mvc\Controller\Plugin\AbstractPlugin
         if (method_exists($this,$action))
             return $this->$action($id);
         else
-            throw new \Exception("$action not found in " . __CLASS__);
+            throw new BadMethodCallException("$action not found in " . __CLASS__ );
 
     }
 
